@@ -1,0 +1,20 @@
+Tạo 1 web app cho phép xem và đặt lịch hẹn trước giờ còn trống cho dịch vụ massage bằng tiếng việt (giờ hoạt động: 13:00-20:00) (tương tự web cho đặt vé xem phim)
+- Cho phép lựa chọn theo giờ còn trống hoặc theo kỹ thuật viên
++ Nếu chọn theo giờ còn trống (sau khi chọn ngày --> hiển thị giờ còn trống trong ngày nếu có ít nhất 1 kỹ thuật viên còn trống --> và cho phép chọn kỹ thuật viên nếu có nhiều hơn 1 kỹ thuật viên còn trống khung giờ được chọn)
++ Nếu chọn theo kỹ thuật viên (sau khi chọn kỹ thuật viên --> hiển thị giờ còn trống (hôm nay, ngày mai) của kỹ thuật viên được chọn)
+- Cho phép lựa chọn các loại dịch vụ gồm: Massage Toàn Body, Massage Cổ-Vai-Gáy, Massage Thái
+- Dịch vụ đi kèm: Đá Nóng, Giác Hơi, Ấn Huyệt (được phép lựa chọn nhiều options)
+- Đối với 1 loại dịch vụ, cho phép chọn thời gian phục vụ gồm: 60 phút và 90 phút
+- Mỗi loại dịch vụ sẽ có đơn giá khác nhau. Cùng 1 loại dịch vụ, đơn giá cũng khác nhau theo thời gian phục vụ
+- Sau khi chọn dịch vụ, sẽ hiện thị để người dùng xem lại các dịch vụ đã chọn cùng tổng số tiền cần thanh toán, đồng thời hiện thị số tiền cần đặt cọc trước (20% tổng số tiền cần thanh toán)
+- Sau khi người dùng thực hiện thanh toán số tiền đặt cọc(suy nghĩ giải pháp để xác định được người dùng đã chuyển khoản thành công vào 1 tài khoản định trước hay chưa). 
+ + Nếu chuyển khoản đặt cọc thành công -> người dùng thực hiện đặt lịch hẹn thành công -> xử lý các bước tiếp theo như block thời gian và kỹ thuật viên đã được đặt lịch, hiện mã code và mã QR, tính toán lại giờ còn trống của kỹ thuật viên để hiển thị chính xác
+ + Nếu chưa chuyển khoản đặt cọc --> yêu cầu người dùng chuyển khoản đặt cọc
+- Khi quét mã QR hay nhập mã code, hiện thị toàn bộ thông tin đặt lịch hẹn tương ứng
+- Cho phép người dùng có thể xem lịch của kỹ thuật viên, đặt lịch hẹn mà không cần đăng nhập
+- Cho phép admin quản lý, chỉnh sửa, block 1 hoặc nhiều khoảng giờ (hiện tại và trong tương lai) của từng kỹ thuật viên (cần đăng nhập + quyền admin)
+- Cho phép admin tạo/cập nhật/xóa thông tin của kỹ thuật viên gồm: tên, năm sinh, ảnh đại diện, thư viện ảnh, ghi chú, ... (cần đăng nhập + quyền admin)
+- Xử dụng kỹ thuật hiện đại với UI/UX trực quan, dễ sử dụng cho người dùng
+- Tối ưu luồng xử lý để tránh nhiều người dùng đặt cùng 1 khung giờ cho cùng 1 kỹ thuật viên
+- Ưu tiên tối ưu hiển thị trên mobile
+- Lựa chọn kỹ thuật (front end, back end, database) tối ưu để web app có thể host trên 1 số free platform

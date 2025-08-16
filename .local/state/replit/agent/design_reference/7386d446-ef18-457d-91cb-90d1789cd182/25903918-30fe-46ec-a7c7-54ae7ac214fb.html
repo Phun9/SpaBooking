@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt Lịch Massage - Spa Relaxation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563EB',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        neutral: {
+                            800: '#1F2937',
+                            600: '#4B5563',
+                            500: '#6B7280',
+                            100: '#F9FAFB'
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', '-apple-system', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .booking-flow-step {
+            transition: all 0.3s ease;
+        }
+        .booking-flow-step.active {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+        }
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+        }
+        .time-slot:hover {
+            background-color: #EBF4FF;
+            border-color: #2563EB;
+        }
+        .time-slot.selected {
+            background-color: #2563EB;
+            color: white;
+        }
+        .floating-summary {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: white;
+            border-top: 1px solid #E5E7EB;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        }
+        @media (min-width: 768px) {
+            .floating-summary {
+                position: sticky;
+                top: 20px;
+                float: right;
+                width: 380px;
+                border: 1px solid #E5E7EB;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+        }
+    </style>
+</head>
+<body class="bg-neutral-100 font-sans">
+    <!-- @COMPONENT: Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-spa text-white text-lg"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-neutral-800">Spa Relaxation</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-neutral-600 hover:text-primary transition-colors">
+                        <i class="fas fa-qrcode text-xl"></i>
+                    </button>
+                    <button class="text-neutral-600 hover:text-primary transition-colors">
+                        <i class="fas fa-user-cog text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <!-- @COMPONENT: MainContent -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- @COMPONENT: BookingFlow -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Hero Section -->
+                <div class="bg-gradient-to-r from-primary to-blue-600 rounded-2xl p-6 text-white">
+                    <h2 class="text-2xl font-bold mb-2">Đặt Lịch Massage</h2>
+                    <p class="text-blue-100 mb-4">Thư giãn với dịch vụ massage chuyên nghiệp</p>
+                    <div class="flex items-center space-x-4 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-clock"></i>
+                            <span>13:00 - 20:00</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-star"></i>
+                            <span>4.9/5 (2,341 đánh giá)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Steps -->
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-medium">1</div>
+                            <span class="text-sm font-medium text-primary">Chọn cách đặt lịch</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-200 mx-4"></div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-sm font-medium">2</div>
+                            <span class="text-sm text-gray-500">Chọn dịch vụ</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-200 mx-4"></div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-sm font-medium">3</div>
+                            <span class="text-sm text-gray-500">Thanh toán</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Method Selection -->
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4">Chọn cách đặt lịch</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="booking-flow-step border-2 border-gray-200 rounded-xl p-4 cursor-pointer hover:border-primary transition-all active" data-method="time">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-clock text-primary text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Theo giờ còn trống</h4>
+                                    <p class="text-sm text-gray-500">Chọn khung giờ phù hợp</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600">Xem tất cả khung giờ còn trống và lựa chọn kỹ thuật viên phù hợp</p>
+                        </div>
+                        <div class="booking-flow-step border-2 border-gray-200 rounded-xl p-4 cursor-pointer hover:border-primary transition-all" data-method="technician">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user-md text-secondary text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Theo kỹ thuật viên</h4>
+                                    <p class="text-sm text-gray-500">Chọn kỹ thuật viên yêu thích</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600">Chọn kỹ thuật viên trước, sau đó xem lịch trống của họ</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time Slot Selection (Active when booking by time) -->
+                <div id="timeSlotSection" class="bg-white rounded-xl p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4">Chọn ngày và giờ</h3>
+                    
+                    <!-- Date Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Chọn ngày</label>
+                        <div class="grid grid-cols-7 gap-2">
+                            <div class="text-center p-3 rounded-lg border-2 border-primary bg-primary text-white cursor-pointer">
+                                <div class="text-xs">T2</div>
+                                <div class="font-medium">25</div>
+                            </div>
+                            <div class="text-center p-3 rounded-lg border border-gray-200 hover:border-primary cursor-pointer">
+                                <div class="text-xs">T3</div>
+                                <div class="font-medium">26</div>
+                            </div>
+                            <div class="text-center p-3 rounded-lg border border-gray-200 hover:border-primary cursor-pointer">
+                                <div class="text-xs">T4</div>
+                                <div class="font-medium">27</div>
+                            </div>
+                            <div class="text-center p-3 rounded-lg border border-gray-200 hover:border-primary cursor-pointer">
+                                <div class="text-xs">T5</div>
+                                <div class="font-medium">28</div>
+                            </div>
+                            <div class="text-center p-3 rounded-lg border border-gray-200 hover:border-primary cursor-pointer">
+                                <div class="text-xs">T6</div>
+                                <div class="font-medium">29</div>
+                            </div>
+                            <div class="text-center p-3 rounded-lg border border-gray-200 hover:border-primary cursor-pointer">
+                                <div class="text-xs">T7</div>
+                                <div class="font-medium">30</div>
+                            </div>
+                            <div class="text-center p-3 rounded-lg border border-gray-200 hover:border-primary cursor-pointer">
+                                <div class="text-xs">CN</div>
+                                <div class="font-medium">31</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Khung giờ còn trống</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            <div class="time-slot text-center p-3 rounded-lg border border-gray-200 cursor-pointer selected">
+                                <div class="font-medium">13:00</div>
+                                <div class="text-xs text-gray-500">3 KTV</div>
+                            </div>
+                            <div class="time-slot text-center p-3 rounded-lg border border-gray-200 cursor-pointer">
+                                <div class="font-medium">14:00</div>
+                                <div class="text-xs text-gray-500">2 KTV</div>
+                            </div>
+                            <div class="time-slot text-center p-3 rounded-lg border border-gray-200 cursor-pointer">
+                                <div class="font-medium">15:00</div>
+                                <div class="text-xs text-gray-500">1 KTV</div>
+                            </div>
+                            <div class="time-slot text-center p-3 rounded-lg border border-gray-200 cursor-pointer opacity-50">
+                                <div class="font-medium">16:00</div>
+                                <div class="text-xs text-gray-500">Hết chỗ</div>
+                            </div>
+                            <div class="time-slot text-center p-3 rounded-lg border border-gray-200 cursor-pointer">
+                                <div class="font-medium">17:00</div>
+                                <div class="text-xs text-gray-500">2 KTV</div>
+                            </div>
+                            <div class="time-slot text-center p-3 rounded-lg border border-gray-200 cursor-pointer">
+                                <div class="font-medium">18:00</div>
+                                <div class="text-xs text-gray-500">3 KTV</div>
+                            </div>
+                            <div class="time-slot text-center p-3 rounded-lg border border-gray-200 cursor-pointer">
+                                <div class="font-medium">19:00</div>
+                                <div class="text-xs text-gray-500">1 KTV</div>
+                            </div>
+                            <div class="time-slot text-center p-3 rounded-lg border border-gray-200 cursor-pointer opacity-50">
+                                <div class="font-medium">20:00</div>
+                                <div class="text-xs text-gray-500">Hết chỗ</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Technician Selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Chọn kỹ thuật viên (13:00)</label>
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:border-primary">
+                                <input type="radio" name="technician" id="tech1" class="w-4 h-4 text-primary">
+                                <label for="tech1" class="flex items-center space-x-3 cursor-pointer flex-1">
+                                    <!-- Professional portrait of a Vietnamese female massage therapist -->
+                                    <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100" alt="Kỹ thuật viên massage" class="w-10 h-10 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <div class="font-medium">Chị Linh</div>
+                                        <div class="text-sm text-gray-500">5 năm kinh nghiệm • 4.9★</div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:border-primary">
+                                <input type="radio" name="technician" id="tech2" class="w-4 h-4 text-primary">
+                                <label for="tech2" class="flex items-center space-x-3 cursor-pointer flex-1">
+                                    <!-- Professional portrait of a Vietnamese male massage therapist -->
+                                    <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100" alt="Kỹ thuật viên massage" class="w-10 h-10 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <div class="font-medium">Anh Minh</div>
+                                        <div class="text-sm text-gray-500">7 năm kinh nghiệm • 4.8★</div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:border-primary">
+                                <input type="radio" name="technician" id="tech3" class="w-4 h-4 text-primary">
+                                <label for="tech3" class="flex items-center space-x-3 cursor-pointer flex-1">
+                                    <!-- Professional portrait of a Vietnamese female massage therapist -->
+                                    <img src="https://pixabay.com/get/g18ac443ef9f1469dc90afa16015570c8e521126ddd5b5e004c6abc7ab0f90781e3125b04f614cc80b1e271e296ce6bb04aeadc1bcf409b337cb16d60b7700e30_1280.jpg" alt="Kỹ thuật viên massage" class="w-10 h-10 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <div class="font-medium">Chị Hương</div>
+                                        <div class="text-sm text-gray-500">4 năm kinh nghiệm • 4.9★</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Selection -->
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4">Chọn dịch vụ</h3>
+                    
+                    <!-- Main Services -->
+                    <div class="space-y-4 mb-6">
+                        <div class="service-card border-2 border-primary rounded-xl p-4 transition-all duration-200 cursor-pointer bg-primary/5">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-medium text-lg">Massage Toàn Body</h4>
+                                <input type="radio" name="service" checked class="w-4 h-4 text-primary">
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">Massage thư giãn toàn thân với tinh dầu thiên nhiên</p>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-2">
+                                    <input type="radio" name="duration" id="duration60" checked class="w-4 h-4 text-primary">
+                                    <label for="duration60" class="text-sm">60 phút - 300.000đ</label>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <input type="radio" name="duration" id="duration90" class="w-4 h-4 text-primary">
+                                    <label for="duration90" class="text-sm">90 phút - 450.000đ</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="service-card border border-gray-200 rounded-xl p-4 transition-all duration-200 cursor-pointer hover:border-primary">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-medium text-lg">Massage Cổ-Vai-Gáy</h4>
+                                <input type="radio" name="service" class="w-4 h-4 text-primary">
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">Massage chuyên sâu vùng cổ, vai, gáy giảm mỏi nhức</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm text-gray-500">60 phút - 250.000đ</span>
+                                <span class="text-sm text-gray-500">90 phút - 350.000đ</span>
+                            </div>
+                        </div>
+                        
+                        <div class="service-card border border-gray-200 rounded-xl p-4 transition-all duration-200 cursor-pointer hover:border-primary">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-medium text-lg">Massage Thái</h4>
+                                <input type="radio" name="service" class="w-4 h-4 text-primary">
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">Massage Thái truyền thống với kỹ thuật kéo giãn</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm text-gray-500">60 phút - 350.000đ</span>
+                                <span class="text-sm text-gray-500">90 phút - 500.000đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Services -->
+                    <div>
+                        <h4 class="font-medium mb-3">Dịch vụ đi kèm</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" class="w-4 h-4 text-primary rounded" checked>
+                                <span class="text-sm">Đá Nóng (+50.000đ)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm">Giác Hơi (+30.000đ)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm">Ấn Huyệt (+40.000đ)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Information -->
+                <div class="bg-white rounded-xl p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4">Thông tin khách hàng</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Họ và tên *</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Nhập họ và tên">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Số điện thoại *</label>
+                            <input type="tel" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Nhập số điện thoại">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ghi chú</label>
+                            <textarea class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" rows="3" placeholder="Ghi chú về yêu cầu đặc biệt (không bắt buộc)"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: BookingFlow -->
+
+            <!-- @COMPONENT: BookingSummary -->
+            <div class="lg:col-span-1">
+                <div class="floating-summary bg-white rounded-xl p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4">Tóm tắt đặt lịch</h3>
+                    
+                    <!-- Booking Details -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-calendar-alt text-primary w-5"></i>
+                            <div>
+                                <div class="font-medium">Thứ 2, 25/12/2023</div>
+                                <div class="text-sm text-gray-500">13:00 - 14:00</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-user-md text-primary w-5"></i>
+                            <div>
+                                <div class="font-medium">Chị Linh</div>
+                                <div class="text-sm text-gray-500">Kỹ thuật viên</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service Details -->
+                    <div class="border-t pt-4 mb-6">
+                        <h4 class="font-medium mb-3">Dịch vụ đã chọn</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm">Massage Toàn Body (60 phút)</span>
+                                <span class="text-sm font-medium">300.000đ</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm">Đá Nóng</span>
+                                <span class="text-sm font-medium">50.000đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total and Deposit -->
+                    <div class="border-t pt-4 mb-6">
+                        <div class="flex justify-between mb-2">
+                            <span class="font-medium">Tổng cộng</span>
+                            <span class="font-medium">350.000đ</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>Cần đặt cọc (20%)</span>
+                            <span class="font-medium text-accent">70.000đ</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="space-y-3">
+                        <button class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                            Đặt lịch ngay
+                        </button>
+                        <button class="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                            Quay lại
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: BookingSummary -->
+        </div>
+
+        <!-- @COMPONENT: PaymentModal (Hidden by default) -->
+        <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-credit-card text-accent text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Thanh toán đặt cọc</h3>
+                        <p class="text-gray-600">Vui lòng chuyển khoản để hoàn tất đặt lịch</p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <h4 class="font-medium mb-3">Thông tin chuyển khoản</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Ngân hàng:</span>
+                                <span class="font-medium">Vietcombank</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Số tài khoản:</span>
+                                <span class="font-medium">0123456789</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Chủ tài khoản:</span>
+                                <span class="font-medium">Spa Relaxation</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Số tiền:</span>
+                                <span class="font-medium text-accent">70.000đ</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Nội dung:</span>
+                                <span class="font-medium">DATCOC SR123456</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code for Payment -->
+                    <div class="text-center mb-6">
+                        <div class="w-48 h-48 bg-gray-100 rounded-xl mx-auto flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-qrcode text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-500">Mã QR thanh toán</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <button class="flex-1 bg-secondary text-white py-3 rounded-lg font-medium hover:bg-green-600 transition-colors">
+                            Đã chuyển khoản
+                        </button>
+                        <button class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                            Hủy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: PaymentModal -->
+
+        <!-- @COMPONENT: SuccessModal (Hidden by default) -->
+        <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-check text-secondary text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Đặt lịch thành công!</h3>
+                        <p class="text-gray-600">Cảm ơn bạn đã đặt lịch. Vui lòng đến đúng giờ.</p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <h4 class="font-medium mb-3">Thông tin đặt lịch</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Mã đặt lịch:</span>
+                                <span class="font-medium">SR123456</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Ngày giờ:</span>
+                                <span class="font-medium">25/12/2023 - 13:00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Kỹ thuật viên:</span>
+                                <span class="font-medium">Chị Linh</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Dịch vụ:</span>
+                                <span class="font-medium">Massage Toàn Body</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code for Booking -->
+                    <div class="text-center mb-6">
+                        <div class="w-48 h-48 bg-gray-100 rounded-xl mx-auto flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-qrcode text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-500">Mã QR đặt lịch</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                        Xong
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: SuccessModal -->
+
+        <!-- @COMPONENT: QRScannerModal (Hidden by default) -->
+        <div id="qrScannerModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-qrcode text-primary text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Tra cứu đặt lịch</h3>
+                        <p class="text-gray-600">Quét mã QR hoặc nhập mã đặt lịch</p>
+                    </div>
+
+                    <div class="text-center mb-6">
+                        <div class="w-48 h-48 bg-gray-100 rounded-xl mx-auto flex items-center justify-center mb-4">
+                            <div class="text-center">
+                                <i class="fas fa-camera text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-500">Camera quét QR</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Hoặc nhập mã đặt lịch</label>
+                        <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Nhập mã đặt lịch">
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <button class="flex-1 bg-primary text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                            Tra cứu
+                        </button>
+                        <button class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: QRScannerModal -->
+    </main>
+    <!-- @END_COMPONENT: MainContent -->
+
+    <!-- @COMPONENT: AdminPanel (Hidden by default) -->
+    <div id="adminPanel" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">Quản lý Admin</h3>
+                    <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Technician Management -->
+                    <div class="md:col-span-2">
+                        <h4 class="font-semibold mb-4">Quản lý kỹ thuật viên</h4>
+                        <div class="space-y-4">
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <!-- Professional portrait of a Vietnamese female massage therapist -->
+                                    <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100" alt="Kỹ thuật viên massage" class="w-12 h-12 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <h5 class="font-medium">Chị Linh</h5>
+                                        <p class="text-sm text-gray-500">Năm sinh: 1990 • 5 năm kinh nghiệm</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="text-sm">
+                                    <p class="text-gray-600">Chuyên môn: Massage Thái, Massage toàn thân</p>
+                                    <p class="text-gray-600">Ghi chú: Kỹ thuật viên có kinh nghiệm, phục vụ tận tâm</p>
+                                </div>
+                            </div>
+                            
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <!-- Professional portrait of a Vietnamese male massage therapist -->
+                                    <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100" alt="Kỹ thuật viên massage" class="w-12 h-12 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <h5 class="font-medium">Anh Minh</h5>
+                                        <p class="text-sm text-gray-500">Năm sinh: 1985 • 7 năm kinh nghiệm</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="text-sm">
+                                    <p class="text-gray-600">Chuyên môn: Massage cổ vai gáy, Ấn huyệt</p>
+                                    <p class="text-gray-600">Ghi chú: Kỹ thuật mạnh tay, phù hợp với khách nam</p>
+                                </div>
+                            </div>
+
+                            <button class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-gray-500 hover:border-primary hover:text-primary transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                Thêm kỹ thuật viên mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Management -->
+                    <div>
+                        <h4 class="font-semibold mb-4">Quản lý lịch trình</h4>
+                        <div class="space-y-4">
+                            <div class="border rounded-lg p-4">
+                                <h5 class="font-medium mb-2">Block thời gian</h5>
+                                <div class="space-y-2">
+                                    <select class="w-full p-2 border border-gray-300 rounded text-sm">
+                                        <option>Chọn kỹ thuật viên</option>
+                                        <option>Chị Linh</option>
+                                        <option>Anh Minh</option>
+                                        <option>Chị Hương</option>
+                                    </select>
+                                    <input type="date" class="w-full p-2 border border-gray-300 rounded text-sm">
+                                    <div class="flex space-x-2">
+                                        <input type="time" class="flex-1 p-2 border border-gray-300 rounded text-sm">
+                                        <input type="time" class="flex-1 p-2 border border-gray-300 rounded text-sm">
+                                    </div>
+                                    <button class="w-full bg-accent text-white py-2 rounded text-sm hover:bg-orange-600 transition-colors">
+                                        Block thời gian
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="border rounded-lg p-4">
+                                <h5 class="font-medium mb-2">Lịch hẹn hôm nay</h5>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>13:00 - Chị Linh</span>
+                                        <span class="text-green-600">Đã xác nhận</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>15:00 - Anh Minh</span>
+                                        <span class="text-yellow-600">Chờ xác nhận</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>17:00 - Chị Hương</span>
+                                        <span class="text-green-600">Đã xác nhận</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: AdminPanel -->
+
+    <script>
+        // TODO: Implement comprehensive booking system logic
+        // TODO: Add real-time availability checking
+        // TODO: Implement payment gateway integration
+        // TODO: Add QR code generation and scanning
+        // TODO: Implement admin authentication and management
+        // TODO: Add database integration for booking persistence
+        // TODO: Implement concurrent booking prevention
+        // TODO: Add email/SMS confirmation system
+
+        (function() {
+            'use strict';
+            
+            // Modal management
+            const modalManager = {
+                show: function(modalId) {
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                        document.body.style.overflow = 'hidden';
+                    }
+                },
+                hide: function(modalId) {
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        modal.classList.add('hidden');
+                        document.body.style.overflow = 'auto';
+                    }
+                }
+            };
+
+            // Booking flow management
+            const bookingManager = {
+                currentStep: 1,
+                selectedMethod: 'time',
+                selectedService: null,
+                selectedTechnician: null,
+                selectedTimeSlot: null,
+                
+                init: function() {
+                    this.bindEvents();
+                },
+                
+                bindEvents: function() {
+                    // Booking method selection
+                    document.querySelectorAll('.booking-flow-step').forEach(step => {
+                        step.addEventListener('click', (e) => {
+                            this.selectBookingMethod(e.currentTarget.dataset.method);
+                        });
+                    });
+
+                    // Service selection
+                    document.querySelectorAll('input[name="service"]').forEach(input => {
+                        input.addEventListener('change', (e) => {
+                            this.updateServiceSelection(e.target);
+                        });
+                    });
+
+                    // Time slot selection
+                    document.querySelectorAll('.time-slot').forEach(slot => {
+                        slot.addEventListener('click', (e) => {
+                            if (!e.currentTarget.classList.contains('opacity-50')) {
+                                this.selectTimeSlot(e.currentTarget);
+                            }
+                        });
+                    });
+
+                    // Modal triggers
+                    document.querySelector('.fa-qrcode').closest('button').addEventListener('click', () => {
+                        modalManager.show('qrScannerModal');
+                    });
+
+                    document.querySelector('.fa-user-cog').closest('button').addEventListener('click', () => {
+                        modalManager.show('adminPanel');
+                    });
+
+                    // Main booking button
+                    document.querySelector('.floating-summary button').addEventListener('click', () => {
+                        modalManager.show('paymentModal');
+                    });
+
+                    // Close modals
+                    document.querySelectorAll('[data-modal-close]').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const modalId = e.target.closest('[id$="Modal"]').id;
+                            modalManager.hide(modalId);
+                        });
+                    });
+
+                    // Payment success simulation
+                    document.querySelector('#paymentModal .bg-secondary').addEventListener('click', () => {
+                        modalManager.hide('paymentModal');
+                        setTimeout(() => {
+                            modalManager.show('successModal');
+                        }, 500);
+                    });
+                },
+                
+                selectBookingMethod: function(method) {
+                    document.querySelectorAll('.booking-flow-step').forEach(step => {
+                        step.classList.remove('active');
+                        if (step.dataset.method === method) {
+                            step.classList.add('active');
+                        }
+                    });
+                    this.selectedMethod = method;
+                },
+                
+                selectTimeSlot: function(slot) {
+                    document.querySelectorAll('.time-slot').forEach(s => {
+                        s.classList.remove('selected');
+                    });
+                    slot.classList.add('selected');
+                    this.selectedTimeSlot = slot.querySelector('.font-medium').textContent;
+                },
+                
+                updateServiceSelection: function(input) {
+                    const card = input.closest('.service-card');
+                    document.querySelectorAll('.service-card').forEach(c => {
+                        c.classList.remove('border-primary', 'bg-primary/5');
+                        c.classList.add('border-gray-200');
+                    });
+                    
+                    if (input.checked) {
+                        card.classList.add('border-primary', 'bg-primary/5');
+                        card.classList.remove('border-gray-200');
+                    }
+                }
+            };
+
+            // Initialize when DOM is ready
+            document.addEventListener('DOMContentLoaded', () => {
+                bookingManager.init();
+                
+                // Close modals when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('bg-black') && e.target.classList.contains('bg-opacity-50')) {
+                        const modalId = e.target.querySelector('[id$="Modal"]').id;
+                        modalManager.hide(modalId);
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
