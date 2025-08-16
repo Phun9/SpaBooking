@@ -120,6 +120,10 @@ export const insertBookingSchema = createInsertSchema(bookings).omit({
   bookingCode: true,
   qrCode: true,
   createdAt: true,
+}).extend({
+  bookingDate: z.string().or(z.date()).transform((val) => {
+    return typeof val === 'string' ? new Date(val) : val;
+  }),
 });
 
 export const insertBlockedTimeSlotSchema = createInsertSchema(blockedTimeSlots).omit({

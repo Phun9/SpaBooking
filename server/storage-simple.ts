@@ -142,6 +142,82 @@ export class SimpleDatabaseStorage {
     return booking;
   }
 
+  async getTechnician(id: number) {
+    const [technician] = await db.select().from(schema.technicians).where(eq(schema.technicians.id, id));
+    return technician;
+  }
+
+  async getService(id: number) {
+    const [service] = await db.select().from(schema.services).where(eq(schema.services.id, id));
+    return service;
+  }
+
+  async getAdditionalService(id: number) {
+    const [service] = await db.select().from(schema.additionalServices).where(eq(schema.additionalServices.id, id));
+    return service;
+  }
+
+  async getBooking(id: number) {
+    const [booking] = await db.select().from(schema.bookings).where(eq(schema.bookings.id, id));
+    return booking;
+  }
+
+  async createTechnician(data: any) {
+    const [technician] = await db.insert(schema.technicians).values(data).returning();
+    return technician;
+  }
+
+  async updateTechnician(id: number, data: any) {
+    const [technician] = await db.update(schema.technicians).set(data).where(eq(schema.technicians.id, id)).returning();
+    return technician;
+  }
+
+  async deleteTechnician(id: number) {
+    await db.delete(schema.technicians).where(eq(schema.technicians.id, id));
+  }
+
+  async createService(data: any) {
+    const [service] = await db.insert(schema.services).values(data).returning();
+    return service;
+  }
+
+  async createAdditionalService(data: any) {
+    const [service] = await db.insert(schema.additionalServices).values(data).returning();
+    return service;
+  }
+
+  async updateBooking(id: number, data: any) {
+    const [booking] = await db.update(schema.bookings).set(data).where(eq(schema.bookings.id, id)).returning();
+    return booking;
+  }
+
+  async deleteBooking(id: number) {
+    await db.delete(schema.bookings).where(eq(schema.bookings.id, id));
+  }
+
+  async getBlockedTimeSlots() {
+    return await db.select().from(schema.blockedTimeSlots);
+  }
+
+  async createBlockedTimeSlot(data: any) {
+    const [slot] = await db.insert(schema.blockedTimeSlots).values(data).returning();
+    return slot;
+  }
+
+  async deleteBlockedTimeSlot(id: number) {
+    await db.delete(schema.blockedTimeSlots).where(eq(schema.blockedTimeSlots.id, id));
+  }
+
+  async getAdminUserByUsername(username: string) {
+    const [admin] = await db.select().from(schema.adminUsers).where(eq(schema.adminUsers.username, username));
+    return admin;
+  }
+
+  async createAdminUser(data: any) {
+    const [admin] = await db.insert(schema.adminUsers).values(data).returning();
+    return admin;
+  }
+
   private generateBookingCode(): string {
     const timestamp = Date.now().toString();
     const random = Math.random().toString(36).substring(2, 8);

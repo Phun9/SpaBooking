@@ -12,11 +12,21 @@ interface ServiceSelectionProps {
 
 export default function ServiceSelection({ bookingData, onBookingDataChange }: ServiceSelectionProps) {
   const { data: services, isLoading: servicesLoading } = useQuery({
-    queryKey: ['/api/services'],
+    queryKey: ['services'],
+    queryFn: async () => {
+      const response = await fetch('/api/services');
+      if (!response.ok) throw new Error('Failed to fetch services');
+      return response.json();
+    },
   });
 
   const { data: additionalServices, isLoading: additionalLoading } = useQuery({
-    queryKey: ['/api/additional-services'],
+    queryKey: ['additional-services'],
+    queryFn: async () => {
+      const response = await fetch('/api/additional-services');
+      if (!response.ok) throw new Error('Failed to fetch additional services');
+      return response.json();
+    },
   });
 
   const formatCurrency = (amount: number) => {
@@ -41,6 +51,13 @@ export default function ServiceSelection({ bookingData, onBookingDataChange }: S
   };
 
   const handleDurationChange = (duration: number) => {
+    onBookingDataChange({
+      ...bookingData,
+      selectedDuration: duration,
+      selectedTime: "",
+      selectedTechnician: null,
+    });
+    
     if (bookingData.selectedService) {
       const basePrice = duration === 60 ? bookingData.selectedService.price60 : bookingData.selectedService.price90;
       const additionalPrice = bookingData.additionalServices.reduce((sum: number, add: any) => sum + add.price, 0);
@@ -164,7 +181,7 @@ export default function ServiceSelection({ bookingData, onBookingDataChange }: S
                 <Checkbox
                   id={`additional-${service.id}`}
                   checked={bookingData.additionalServices.some((s: any) => s.id === service.id)}
-                  onCheckedChange={(checked) => handleAdditionalServiceChange(service, checked)}
+                  onCheckedChange={(checked) => handleAdditionalServiceChange(service, !!checked)}
                 />
                 <Label htmlFor={`additional-${service.id}`} className="text-sm">
                   {service.name} (+{formatCurrency(service.price)})

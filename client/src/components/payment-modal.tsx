@@ -73,18 +73,20 @@ export default function PaymentModal({ isOpen, onClose, bookingData }: PaymentMo
     const bookingPayload = {
       customerName: bookingData.customerInfo.name,
       customerPhone: bookingData.customerInfo.phone,
-      customerNotes: bookingData.customerInfo.notes,
-      technicianId: bookingData.selectedTechnician.id,
-      serviceId: bookingData.selectedService.id,
-      duration: bookingData.selectedDuration,
-      additionalServiceIds: bookingData.additionalServices.map((s: any) => s.id),
-      bookingDate: new Date(bookingData.selectedDate),
+      customerNotes: bookingData.customerInfo.notes || '',
+      technicianId: parseInt(bookingData.selectedTechnician.id),
+      serviceId: parseInt(bookingData.selectedService.id),
+      duration: parseInt(bookingData.selectedDuration),
+      additionalServiceIds: bookingData.additionalServices?.map((s: any) => parseInt(s.id)) || [],
+      bookingDate: new Date(bookingData.selectedDate + 'T00:00:00.000Z'),
       startTime: bookingData.selectedTime,
       endTime: calculateEndTime(bookingData.selectedTime, bookingData.selectedDuration),
-      totalAmount: bookingData.totalAmount,
+      totalAmount: parseInt(bookingData.totalAmount),
+      depositAmount: parseInt(bookingData.depositAmount),
       status: 'pending',
     };
 
+    console.log('Sending booking payload:', bookingPayload);
     createBookingMutation.mutate(bookingPayload);
   };
 

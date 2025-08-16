@@ -14,7 +14,12 @@ export default function TimeSlotPicker({ bookingData, onBookingDataChange }: Tim
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const { data: availability, isLoading } = useQuery({
-    queryKey: ['/api/availability', bookingData.selectedDate, bookingData.selectedDuration],
+    queryKey: ['availability', bookingData.selectedDate, bookingData.selectedDuration],
+    queryFn: async () => {
+      const response = await fetch(`/api/availability/${bookingData.selectedDate}/${bookingData.selectedDuration}`);
+      if (!response.ok) throw new Error('Failed to fetch availability');
+      return response.json();
+    },
     enabled: !!bookingData.selectedDate && !!bookingData.selectedDuration,
   });
 
@@ -104,7 +109,7 @@ export default function TimeSlotPicker({ bookingData, onBookingDataChange }: Tim
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {availability?.map((slot: any) => (
+                {availability && Array.isArray(availability) && availability.length > 0 ? availability.map((slot: any) => (
                   <button
                     key={slot.time}
                     onClick={() => handleTimeSelect(slot.time, slot.availableTechnicians)}
@@ -119,7 +124,11 @@ export default function TimeSlotPicker({ bookingData, onBookingDataChange }: Tim
                       {slot.availableTechnicians.length} KTV
                     </div>
                   </button>
-                ))}
+                )) : (
+                  <div className="col-span-full text-center py-4 text-gray-500">
+                    Không có khung giờ trống
+                  </div>
+                )}
               </div>
             )}
           </div>
