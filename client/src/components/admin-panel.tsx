@@ -25,7 +25,10 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  Search,
+  Filter,
+  Eye
 } from "lucide-react";
 
 export default function AdminPanel() {
@@ -35,28 +38,54 @@ export default function AdminPanel() {
   const [showTechnicianDialog, setShowTechnicianDialog] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
   const [editingTechnician, setEditingTechnician] = useState<any>(null);
+  const [bookingFilters, setBookingFilters] = useState({
+    search: '',
+    technician: 'all',
+    status: 'all',
+    dateFrom: '',
+    dateTo: ''
+  });
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [showBookingDetails, setShowBookingDetails] = useState(false);
 
   // WebSocket connection for real-time updates
+  const handleWebSocketMessage = (data: any) => {
+    if (data.type === 'booking_created' || data.type === 'booking_updated') {
+      queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/availability'] });
+    }
+  };
+
   useWebSocket('/ws', {
-    onMessage: (data) => {
-      if (data.type === 'booking_created' || data.type === 'booking_updated') {
-        queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/availability'] });
-      }
-    },
+    onMessage: handleWebSocketMessage,
   });
 
   // Fetch data
   const { data: technicians, isLoading: techniciansLoading } = useQuery({
     queryKey: ['/api/technicians'],
+    queryFn: async () => {
+      const response = await fetch('/api/technicians');
+      if (!response.ok) throw new Error('Failed to fetch technicians');
+      return response.json();
+    },
   });
 
   const { data: bookings, isLoading: bookingsLoading } = useQuery({
     queryKey: ['/api/bookings'],
+    queryFn: async () => {
+      const response = await fetch('/api/bookings');
+      if (!response.ok) throw new Error('Failed to fetch bookings');
+      return response.json();
+    },
   });
 
   const { data: blockedSlots, isLoading: blockedSlotsLoading } = useQuery({
     queryKey: ['/api/blocked-time-slots'],
+    queryFn: async () => {
+      const response = await fetch('/api/blocked-time-slots');
+      if (!response.ok) throw new Error('Failed to fetch blocked slots');
+      return response.json();
+    },
   });
 
   // Mutations
@@ -222,11 +251,30 @@ export default function AdminPanel() {
     }
   };
 
-  const todayBookings = bookings?.filter((booking: any) => {
+  const todayBookings = Array.isArray(bookings) ? bookings.filter((booking: any) => {
     const bookingDate = new Date(booking.bookingDate);
     const today = new Date();
     return bookingDate.toDateString() === today.toDateString();
-  });
+  }) : [];
+
+  const filteredBookings = Array.isArray(bookings) ? bookings.filter((booking: any) => {
+    const searchMatch = !bookingFilters.search || 
+      booking.customerName?.toLowerCase().includes(bookingFilters.search.toLowerCase()) ||
+      booking.customerPhone?.includes(bookingFilters.search) ||
+      booking.bookingCode?.toLowerCase().includes(bookingFilters.search.toLowerCase());
+    
+    const technicianMatch = !bookingFilters.technician || bookingFilters.technician === 'all' || 
+      booking.technicianId?.toString() === bookingFilters.technician;
+    
+    const statusMatch = !bookingFilters.status || bookingFilters.status === 'all' || 
+      booking.status === bookingFilters.status;
+    
+    const dateMatch = (!bookingFilters.dateFrom || new Date(booking.bookingDate) >= new Date(bookingFilters.dateFrom)) &&
+                     (!bookingFilters.dateTo || new Date(booking.bookingDate) <= new Date(bookingFilters.dateTo));
+    
+    return searchMatch && technicianMatch && statusMatch && dateMatch;
+  }) : [];
+
 
   return (
     <div className="space-y-6">
@@ -238,7 +286,7 @@ export default function AdminPanel() {
               <Users className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm text-gray-600">Kỹ thuật viên</p>
-                <p className="text-2xl font-bold">{technicians?.length || 0}</p>
+                <p className="text-2xl font-bold">{Array.isArray(technicians) ? technicians.length : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -250,7 +298,7 @@ export default function AdminPanel() {
               <Calendar className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm text-gray-600">Lịch hẹn hôm nay</p>
-                <p className="text-2xl font-bold">{todayBookings?.length || 0}</p>
+                <p className="text-2xl font-bold">{todayBookings.length}</p>
               </div>
             </div>
           </CardContent>
@@ -262,7 +310,7 @@ export default function AdminPanel() {
               <CalendarX className="h-5 w-5 text-red-600" />
               <div>
                 <p className="text-sm text-gray-600">Thời gian bị block</p>
-                <p className="text-2xl font-bold">{blockedSlots?.length || 0}</p>
+                <p className="text-2xl font-bold">{Array.isArray(blockedSlots) ? blockedSlots.length : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -275,7 +323,7 @@ export default function AdminPanel() {
               <div>
                 <p className="text-sm text-gray-600">Chờ xác nhận</p>
                 <p className="text-2xl font-bold">
-                  {bookings?.filter((b: any) => b.status === 'pending').length || 0}
+                  {Array.isArray(bookings) ? bookings.filter((b: any) => b.status === 'pending').length : 0}
                 </p>
               </div>
             </div>
@@ -284,9 +332,10 @@ export default function AdminPanel() {
       </div>
 
       <Tabs defaultValue="technicians" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="technicians">Kỹ thuật viên</TabsTrigger>
-          <TabsTrigger value="bookings">Lịch đặt</TabsTrigger>
+          <TabsTrigger value="bookings">Lịch đặt hôm nay</TabsTrigger>
+          <TabsTrigger value="all-bookings">Tất cả lịch đặt</TabsTrigger>
           <TabsTrigger value="schedule">Quản lý lịch</TabsTrigger>
         </TabsList>
 
@@ -389,8 +438,8 @@ export default function AdminPanel() {
               <div className="col-span-2 flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
-            ) : (
-              technicians?.map((technician: any) => (
+            ) : Array.isArray(technicians) ? (
+              technicians.map((technician: any) => (
                 <Card key={technician.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-3 mb-3">
@@ -449,6 +498,10 @@ export default function AdminPanel() {
                   </CardContent>
                 </Card>
               ))
+            ) : (
+              <div className="col-span-2 text-center py-4 text-gray-500">
+                Không có kỹ thuật viên nào
+              </div>
             )}
           </div>
         </TabsContent>
@@ -498,7 +551,7 @@ export default function AdminPanel() {
                       <div>
                         <p className="text-gray-600">Kỹ thuật viên:</p>
                         <p className="font-medium">
-                          {technicians?.find((t: any) => t.id === booking.technicianId)?.name || 'N/A'}
+                          {Array.isArray(technicians) ? technicians.find((t: any) => t.id === booking.technicianId)?.name || 'N/A' : 'N/A'}
                         </p>
                       </div>
                       <div>
@@ -543,6 +596,257 @@ export default function AdminPanel() {
           </div>
         </TabsContent>
 
+        {/* All Bookings Tab */}
+        <TabsContent value="all-bookings" className="space-y-4">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold">Tất cả lịch đặt</h3>
+          </div>
+
+          {/* Filters */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Filter className="h-5 w-5" />
+                <span>Bộ lọc</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="search">Tìm kiếm</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="search"
+                      placeholder="Tên, SĐT, mã đặt lịch..."
+                      value={bookingFilters.search}
+                      onChange={(e) => setBookingFilters({...bookingFilters, search: e.target.value})}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="technician-filter">Kỹ thuật viên</Label>
+                  <Select
+                    value={bookingFilters.technician}
+                    onValueChange={(value) => setBookingFilters({...bookingFilters, technician: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tất cả kỹ thuật viên" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tất cả kỹ thuật viên</SelectItem>
+                      {Array.isArray(technicians) ? technicians.map((tech: any) => (
+                        <SelectItem key={tech.id} value={tech.id.toString()}>
+                          {tech.name}
+                        </SelectItem>
+                      )) : null}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="status-filter">Trạng thái</Label>
+                  <Select
+                    value={bookingFilters.status}
+                    onValueChange={(value) => setBookingFilters({...bookingFilters, status: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tất cả trạng thái" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                      <SelectItem value="pending">Chờ xác nhận</SelectItem>
+                      <SelectItem value="confirmed">Đã xác nhận</SelectItem>
+                      <SelectItem value="cancelled">Đã hủy</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="date-from">Từ ngày</Label>
+                  <Input
+                    id="date-from"
+                    type="date"
+                    value={bookingFilters.dateFrom}
+                    onChange={(e) => setBookingFilters({...bookingFilters, dateFrom: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="date-to">Đến ngày</Label>
+                  <Input
+                    id="date-to"
+                    type="date"
+                    value={bookingFilters.dateTo}
+                    onChange={(e) => setBookingFilters({...bookingFilters, dateTo: e.target.value})}
+                  />
+                </div>
+                <div className="flex items-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => setBookingFilters({search: '', technician: 'all', status: 'all', dateFrom: '', dateTo: ''})}
+                    className="w-full"
+                  >
+                    Xóa bộ lọc
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Bookings List */}
+          <div className="space-y-4">
+            {bookingsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : filteredBookings.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">Không tìm thấy lịch đặt nào</p>
+                </CardContent>
+              </Card>
+            ) : (
+              filteredBookings.map((booking: any) => (
+                <Card key={booking.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                          <User className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-lg">{booking.customerName}</h4>
+                          <p className="text-sm text-gray-500">{booking.customerPhone}</p>
+                          <p className="text-xs text-gray-400">Mã: {booking.bookingCode}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={getStatusColor(booking.status)}>
+                          {getStatusText(booking.status)}
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedBooking(booking);
+                            setShowBookingDetails(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-600 font-medium">Ngày & Giờ:</p>
+                        <p className="font-medium">{formatDateTime(booking.bookingDate)}</p>
+                        <p className="text-sm">{booking.startTime} - {booking.endTime}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600 font-medium">Kỹ thuật viên:</p>
+                        <p className="font-medium">
+                          {Array.isArray(technicians) ? technicians.find((t: any) => t.id === booking.technicianId)?.name || 'N/A' : 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600 font-medium">Thời gian massage:</p>
+                        <p className="font-medium">{booking.duration} phút</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600 font-medium">Tổng tiền:</p>
+                        <p className="font-medium text-lg text-green-600">{formatCurrency(booking.totalAmount)}</p>
+                        <p className="text-xs text-gray-500">Cọc: {formatCurrency(booking.depositAmount)}</p>
+                      </div>
+                    </div>
+
+                    {booking.customerNotes && (
+                      <div className="mt-3 p-2 bg-gray-50 rounded">
+                        <p className="text-sm text-gray-600"><strong>Ghi chú:</strong> {booking.customerNotes}</p>
+                      </div>
+                    )}
+
+                    {booking.status === 'pending' && (
+                      <div className="flex space-x-2 mt-4">
+                        <Button
+                          size="sm"
+                          onClick={() => updateBookingMutation.mutate({
+                            id: booking.id,
+                            data: { status: 'confirmed' }
+                          })}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Xác nhận
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateBookingMutation.mutate({
+                            id: booking.id,
+                            data: { status: 'cancelled' }
+                          })}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Hủy
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+
+          {/* Booking Details Dialog */}
+          <Dialog open={showBookingDetails} onOpenChange={setShowBookingDetails}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Chi tiết đặt lịch - {selectedBooking?.bookingCode}</DialogTitle>
+              </DialogHeader>
+              {selectedBooking && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Thông tin khách hàng</h4>
+                      <div className="space-y-1 text-sm">
+                        <p><strong>Tên:</strong> {selectedBooking.customerName}</p>
+                        <p><strong>SĐT:</strong> {selectedBooking.customerPhone}</p>
+                        {selectedBooking.customerNotes && (
+                          <p><strong>Ghi chú:</strong> {selectedBooking.customerNotes}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Thông tin dịch vụ</h4>
+                      <div className="space-y-1 text-sm">
+                        <p><strong>Ngày:</strong> {formatDateTime(selectedBooking.bookingDate)}</p>
+                        <p><strong>Giờ:</strong> {selectedBooking.startTime} - {selectedBooking.endTime}</p>
+                        <p><strong>Thời gian:</strong> {selectedBooking.duration} phút</p>
+                        <p><strong>Kỹ thuật viên:</strong> {Array.isArray(technicians) ? technicians.find((t: any) => t.id === selectedBooking.technicianId)?.name || 'N/A' : 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2">Thanh toán</h4>
+                    <div className="space-y-1 text-sm">
+                      <p><strong>Tổng tiền:</strong> {formatCurrency(selectedBooking.totalAmount)}</p>
+                      <p><strong>Tiền cọc:</strong> {formatCurrency(selectedBooking.depositAmount)}</p>
+                      <p><strong>Trạng thái thanh toán:</strong> {selectedBooking.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}</p>
+                      <p><strong>Phương thức:</strong> {selectedBooking.paymentMethod || 'N/A'}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2">Trạng thái</h4>
+                    <Badge className={getStatusColor(selectedBooking.status)}>
+                      {getStatusText(selectedBooking.status)}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+        </TabsContent>
+
         {/* Schedule Tab */}
         <TabsContent value="schedule" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -574,11 +878,11 @@ export default function AdminPanel() {
                             <SelectValue placeholder="Chọn kỹ thuật viên" />
                           </SelectTrigger>
                           <SelectContent>
-                            {technicians?.map((tech: any) => (
+                            {Array.isArray(technicians) ? technicians.map((tech: any) => (
                               <SelectItem key={tech.id} value={tech.id.toString()}>
                                 {tech.name}
                               </SelectItem>
-                            ))}
+                            )) : null}
                           </SelectContent>
                         </Select>
                       </div>
@@ -654,19 +958,19 @@ export default function AdminPanel() {
                     <div className="flex items-center justify-center py-4">
                       <Loader2 className="h-5 w-5 animate-spin" />
                     </div>
-                  ) : blockedSlots?.length === 0 ? (
+                  ) : !Array.isArray(blockedSlots) || blockedSlots.length === 0 ? (
                     <p className="text-gray-500 text-center py-4">
                       Chưa có thời gian nào bị block
                     </p>
                   ) : (
-                    blockedSlots?.map((slot: any) => (
+                    blockedSlots.map((slot: any) => (
                       <div
                         key={slot.id}
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                       >
                         <div className="flex-1">
                           <p className="font-medium">
-                            {technicians?.find((t: any) => t.id === slot.technicianId)?.name || 'N/A'}
+                            {Array.isArray(technicians) ? technicians.find((t: any) => t.id === slot.technicianId)?.name || 'N/A' : 'N/A'}
                           </p>
                           <p className="text-sm text-gray-600">
                             {formatDateTime(slot.blockDate)} • {slot.startTime} - {slot.endTime}

@@ -129,6 +129,10 @@ export const insertBookingSchema = createInsertSchema(bookings).omit({
 export const insertBlockedTimeSlotSchema = createInsertSchema(blockedTimeSlots).omit({
   id: true,
   createdAt: true,
+}).extend({
+  blockDate: z.string().or(z.date()).transform((val) => {
+    return typeof val === 'string' ? new Date(val) : val;
+  }),
 });
 
 export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({

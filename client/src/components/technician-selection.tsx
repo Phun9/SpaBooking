@@ -17,6 +17,11 @@ export default function TechnicianSelection({ bookingData, onBookingDataChange }
 
   const { data: availability, isLoading: availabilityLoading } = useQuery({
     queryKey: ['/api/technicians', bookingData.selectedTechnician?.id, 'availability', bookingData.selectedDate],
+    queryFn: async () => {
+      const response = await fetch(`/api/technicians/${bookingData.selectedTechnician.id}/availability?date=${bookingData.selectedDate}`);
+      if (!response.ok) throw new Error('Failed to fetch availability');
+      return response.json();
+    },
     enabled: !!bookingData.selectedTechnician?.id && !!bookingData.selectedDate,
   });
 
@@ -82,7 +87,7 @@ export default function TechnicianSelection({ bookingData, onBookingDataChange }
         <div>
           <Label className="block text-sm font-medium text-gray-700 mb-2">Chọn kỹ thuật viên</Label>
           <div className="space-y-3">
-            {technicians?.map((technician: any) => (
+            {technicians && Array.isArray(technicians) ? technicians.map((technician: any) => (
               <div
                 key={technician.id}
                 className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all ${
@@ -120,7 +125,11 @@ export default function TechnicianSelection({ bookingData, onBookingDataChange }
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-4 text-gray-500">
+                Không có kỹ thuật viên nào
+              </div>
+            )}
           </div>
         </div>
 
@@ -158,7 +167,7 @@ export default function TechnicianSelection({ bookingData, onBookingDataChange }
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {availability?.map((time: string) => (
+                {availability && Array.isArray(availability) && availability.length > 0 ? availability.map((time: string) => (
                   <button
                     key={time}
                     onClick={() => handleTimeSelect(time)}
@@ -170,7 +179,11 @@ export default function TechnicianSelection({ bookingData, onBookingDataChange }
                   >
                     <div className="font-medium">{time}</div>
                   </button>
-                ))}
+                )) : (
+                  <div className="col-span-full text-center py-4 text-gray-500">
+                    Không có khung giờ trống
+                  </div>
+                )}
               </div>
             )}
           </div>

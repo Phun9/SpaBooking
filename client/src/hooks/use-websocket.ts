@@ -63,7 +63,7 @@ export function useWebSocket(path: string, options: UseWebSocketOptions = {}) {
         wsRef.current = null;
       }
     };
-  }, [path, autoConnect, onMessage, onOpen, onClose, onError]);
+  }, [path, autoConnect]); // Remove callback dependencies to prevent loops
 
   const sendMessage = (data: any) => {
     if (wsRef.current && wsRef.current.isConnected()) {
