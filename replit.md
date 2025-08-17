@@ -8,6 +8,21 @@ This is a Vietnamese massage spa booking web application built with a modern ful
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (August 17, 2025)
+
+- **Migration Completed**: Successfully migrated from Replit Agent to Replit environment
+- **Duration Update**: Changed service duration from 60 minutes to 45 minutes throughout the system:
+  - Updated frontend display text from "60 phút" to "45 phút"
+  - Modified all duration logic in components (service selection, booking summary, booking lookup)
+  - Updated database records: all existing bookings changed from 60 to 45 minutes
+  - Updated default duration in booking initialization
+  - **Database Schema Update**: Renamed column from `price_60` to `price_45` in services table
+  - **Code Update**: Changed all references from `price60` to `price45` throughout the application
+  - Fixed total calculation logic in booking summary
+  - **Time Slot Bug Fix**: Fixed multi-slot booking availability logic - 90-minute bookings now correctly block all overlapping time slots
+- **Database Setup**: Created PostgreSQL database and pushed schema successfully
+- **Dependencies**: Installed missing tsx package and resolved build issues
+
 ## System Architecture
 
 ### Frontend Architecture

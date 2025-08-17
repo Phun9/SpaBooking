@@ -20,7 +20,7 @@ export default function Home() {
     selectedTime: "",
     selectedTechnician: null,
     selectedService: null,
-    selectedDuration: 60,
+    selectedDuration: 45,
     additionalServices: [],
     customerInfo: {
       name: "",

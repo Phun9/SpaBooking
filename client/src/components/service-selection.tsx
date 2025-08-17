@@ -37,7 +37,7 @@ export default function ServiceSelection({ bookingData, onBookingDataChange }: S
   };
 
   const handleServiceChange = (service: any) => {
-    const basePrice = bookingData.selectedDuration === 60 ? service.price60 : service.price90;
+    const basePrice = bookingData.selectedDuration === 45 ? service.price45 : service.price90;
     const additionalPrice = bookingData.additionalServices.reduce((sum: number, add: any) => sum + add.price, 0);
     const totalAmount = basePrice + additionalPrice;
     const depositAmount = Math.round(totalAmount * 0.2);
@@ -59,7 +59,7 @@ export default function ServiceSelection({ bookingData, onBookingDataChange }: S
     });
     
     if (bookingData.selectedService) {
-      const basePrice = duration === 60 ? bookingData.selectedService.price60 : bookingData.selectedService.price90;
+      const basePrice = duration === 45 ? bookingData.selectedService.price45 : bookingData.selectedService.price90;
       const additionalPrice = bookingData.additionalServices.reduce((sum: number, add: any) => sum + add.price, 0);
       const totalAmount = basePrice + additionalPrice;
       const depositAmount = Math.round(totalAmount * 0.2);
@@ -83,7 +83,7 @@ export default function ServiceSelection({ bookingData, onBookingDataChange }: S
     }
 
     const basePrice = bookingData.selectedService 
-      ? (bookingData.selectedDuration === 60 ? bookingData.selectedService.price60 : bookingData.selectedService.price90)
+      ? (bookingData.selectedDuration === 45 ? bookingData.selectedService.price45 : bookingData.selectedService.price90)
       : 0;
     const additionalPrice = newAdditionalServices.reduce((sum: number, add: any) => sum + add.price, 0);
     const totalAmount = basePrice + additionalPrice;
@@ -140,14 +140,14 @@ export default function ServiceSelection({ bookingData, onBookingDataChange }: S
                         <div className="flex items-center space-x-2">
                           <input
                             type="radio"
-                            id={`${service.id}-60`}
+                            id={`${service.id}-45`}
                             name="duration"
-                            checked={bookingData.selectedDuration === 60}
-                            onChange={() => handleDurationChange(60)}
+                            checked={bookingData.selectedDuration === 45}
+                            onChange={() => handleDurationChange(45)}
                             className="w-4 h-4 text-primary"
                           />
-                          <Label htmlFor={`${service.id}-60`} className="text-sm">
-                            60 phút - {formatCurrency(service.price60)}
+                          <Label htmlFor={`${service.id}-45`} className="text-sm">
+                            45 phút - {formatCurrency(service.price45)}
                           </Label>
                         </div>
                         <div className="flex items-center space-x-2">

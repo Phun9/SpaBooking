@@ -57,21 +57,21 @@ export class SimpleDatabaseStorage {
         {
           name: "Massage Toàn Thân",
           description: "Massage thư giãn toàn thân giúp giảm căng thẳng",
-          price60: 400000,
+          price45: 400000,
           price90: 600000,
           isActive: true
         },
         {
           name: "Massage Cổ-Vai-Gáy",
           description: "Massage tập trung vào vùng cổ, vai và gáy",
-          price60: 300000,
+          price45: 300000,
           price90: 450000,
           isActive: true
         },
         {
           name: "Massage Thái",
           description: "Massage theo phong cách truyền thống Thái Lan",
-          price60: 450000,
+          price45: 450000,
           price90: 650000,
           isActive: true
         }

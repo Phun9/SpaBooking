@@ -21,7 +21,7 @@ export const services = pgTable("services", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  price60: integer("price_60").notNull(), // price for 60 minutes in VND
+  price45: integer("price_45").notNull(), // price for 45 minutes in VND
   price90: integer("price_90").notNull(), // price for 90 minutes in VND
   isActive: boolean("is_active").default(true),
 });
@@ -41,7 +41,7 @@ export const bookings = pgTable("bookings", {
   customerNotes: text("customer_notes"),
   technicianId: integer("technician_id").references(() => technicians.id),
   serviceId: integer("service_id").references(() => services.id),
-  duration: integer("duration").notNull(), // 60 or 90 minutes
+  duration: integer("duration").notNull(), // 45 or 90 minutes
   additionalServiceIds: json("additional_service_ids").$type<number[]>().default([]),
   bookingDate: timestamp("booking_date").notNull(),
   startTime: text("start_time").notNull(), // "13:00" format

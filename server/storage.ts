@@ -236,11 +236,11 @@ export class DatabaseStorage implements IStorage {
       const endDate = new Date(date);
       endDate.setDate(endDate.getDate() + 1);
       
-      query = query.where(and(
+      query = db.select().from(bookings).where(and(
         eq(bookings.technicianId, technicianId),
         gte(bookings.bookingDate, startDate),
         lte(bookings.bookingDate, endDate)
-      )) as any;
+      ));
     }
     
     return await query.orderBy(bookings.startTime);
@@ -285,11 +285,11 @@ export class DatabaseStorage implements IStorage {
       const endDate = new Date(date);
       endDate.setDate(endDate.getDate() + 1);
       
-      query = query.where(and(
+      query = db.select().from(blockedTimeSlots).where(and(
         eq(blockedTimeSlots.technicianId, technicianId),
         gte(blockedTimeSlots.blockDate, startDate),
         lte(blockedTimeSlots.blockDate, endDate)
-      )) as any;
+      ));
     }
     
     return await query.orderBy(blockedTimeSlots.startTime);

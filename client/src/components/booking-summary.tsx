@@ -85,8 +85,8 @@ export default function BookingSummary({ bookingData, onSubmit }: BookingSummary
                   </span>
                   <span className="text-sm font-medium">
                     {formatCurrency(
-                      bookingData.selectedDuration === 60 
-                        ? bookingData.selectedService.price60 
+                      bookingData.selectedDuration === 45 
+                        ? bookingData.selectedService.price45 
                         : bookingData.selectedService.price90
                     )}
                   </span>

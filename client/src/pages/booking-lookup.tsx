@@ -130,7 +130,7 @@ export default function BookingLookup() {
                     <div className="flex justify-between">
                       <span>{booking.service?.name} ({booking.duration} phút)</span>
                       <span className="font-medium">
-                        {formatCurrency(booking.duration === 60 ? booking.service?.price60 : booking.service?.price90)}
+                        {formatCurrency(booking.duration === 45 ? booking.service?.price45 : booking.service?.price90)}
                       </span>
                     </div>
                     {booking.additionalServices?.map((service: any) => (

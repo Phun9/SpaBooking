@@ -8,6 +8,12 @@ import { db } from "./db";
 import * as schema from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
+// Helper function to convert time string to minutes
+const timeToMinutes = (time: string): number => {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
 // Availability logic functions
 const generateTimeSlots = () => {
   const slots = [];
@@ -40,10 +46,18 @@ const getAvailableTimeSlots = async (dateStr: string, duration: number) => {
       
       for (const technician of technicians) {
         // Check if technician is available at this time slot
-        const isBooked = existingBookings.some(booking => 
-          booking.technicianId === technician.id && 
-          booking.startTime === timeSlot
-        );
+        // Need to check if this time slot conflicts with any existing booking
+        const isBooked = existingBookings.some(booking => {
+          if (booking.technicianId !== technician.id) return false;
+          
+          // Convert times to minutes for easier calculation
+          const slotStart = timeToMinutes(timeSlot);
+          const bookingStart = timeToMinutes(booking.startTime);
+          const bookingEnd = timeToMinutes(booking.endTime);
+          
+          // Check if this time slot overlaps with the booking
+          return slotStart >= bookingStart && slotStart < bookingEnd;
+        });
         
         const isBlocked = blockedSlots.some(blocked => 
           blocked.technicianId === technician.id && 
@@ -90,7 +104,17 @@ const getTechnicianAvailability = async (technicianId: number, dateStr: string) 
       ));
     
     const availableSlots = slots.filter(timeSlot => {
-      const isBooked = existingBookings.some(booking => booking.startTime === timeSlot);
+      // Check if this time slot conflicts with any existing booking
+      const isBooked = existingBookings.some(booking => {
+        // Convert times to minutes for easier calculation
+        const slotStart = timeToMinutes(timeSlot);
+        const bookingStart = timeToMinutes(booking.startTime);
+        const bookingEnd = timeToMinutes(booking.endTime);
+        
+        // Check if this time slot overlaps with the booking
+        return slotStart >= bookingStart && slotStart < bookingEnd;
+      });
+      
       const isBlocked = blockedSlots.some(blocked => blocked.startTime === timeSlot);
       return !isBooked && !isBlocked;
     });
