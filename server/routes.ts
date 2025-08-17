@@ -59,10 +59,17 @@ const getAvailableTimeSlots = async (dateStr: string, duration: number) => {
           return slotStart >= bookingStart && slotStart < bookingEnd;
         });
         
-        const isBlocked = blockedSlots.some(blocked => 
-          blocked.technicianId === technician.id && 
-          blocked.startTime === timeSlot
-        );
+        const isBlocked = blockedSlots.some(blocked => {
+          if (blocked.technicianId !== technician.id) return false;
+          
+          // Convert times to minutes for easier calculation
+          const slotStart = timeToMinutes(timeSlot);
+          const blockedStart = timeToMinutes(blocked.startTime);
+          const blockedEnd = timeToMinutes(blocked.endTime);
+          
+          // Check if this time slot falls within the blocked period
+          return slotStart >= blockedStart && slotStart < blockedEnd;
+        });
         
         if (!isBooked && !isBlocked) {
           availableTechnicians.push(technician);
@@ -115,7 +122,16 @@ const getTechnicianAvailability = async (technicianId: number, dateStr: string) 
         return slotStart >= bookingStart && slotStart < bookingEnd;
       });
       
-      const isBlocked = blockedSlots.some(blocked => blocked.startTime === timeSlot);
+      const isBlocked = blockedSlots.some(blockedSlot => {
+        // Convert times to minutes for easier calculation
+        const slotStart = timeToMinutes(timeSlot);
+        const blockedStart = timeToMinutes(blockedSlot.startTime);
+        const blockedEnd = timeToMinutes(blockedSlot.endTime);
+        
+        // Check if this time slot falls within the blocked period
+        return slotStart >= blockedStart && slotStart < blockedEnd;
+      });
+      
       return !isBooked && !isBlocked;
     });
     

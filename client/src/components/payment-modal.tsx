@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,17 @@ interface PaymentModalProps {
 }
 
 export default function PaymentModal({ isOpen, onClose, bookingData }: PaymentModalProps) {
-  const [step, setStep] = useState<'payment' | 'verification' | 'success'>('payment');
+  const [step, setStep] = useState<'payment' | 'verification' | 'success'>('verification');
   const [booking, setBooking] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Auto-create booking when modal opens
+  useEffect(() => {
+    if (isOpen && !booking && !createBookingMutation.isPending) {
+      handleCreateBooking();
+    }
+  }, [isOpen]);
 
   const createBookingMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -114,9 +121,17 @@ export default function PaymentModal({ isOpen, onClose, bookingData }: PaymentMo
   };
 
   const handleClose = () => {
-    setStep('payment');
+    setStep('verification');
     setBooking(null);
     onClose();
+  };
+
+  const handleCloseWithRefresh = () => {
+    setStep('verification');
+    setBooking(null);
+    onClose();
+    // Refresh the page to update all data
+    window.location.reload();
   };
 
   return (
@@ -195,6 +210,18 @@ export default function PaymentModal({ isOpen, onClose, bookingData }: PaymentMo
           </>
         )}
 
+        {createBookingMutation.isPending && (
+          <>
+            <DialogHeader>
+              <DialogTitle>Đang tạo đặt lịch...</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="text-gray-600">Vui lòng đợi trong giây lát...</p>
+            </div>
+          </>
+        )}
+
         {step === 'verification' && booking && (
           <>
             <DialogHeader>
@@ -219,9 +246,52 @@ export default function PaymentModal({ isOpen, onClose, bookingData }: PaymentMo
                 </CardContent>
               </Card>
 
-              <p className="text-center text-gray-600">
-                Vui lòng chuyển khoản theo thông tin trên và nhấn "Đã chuyển khoản" để xác nhận.
-              </p>
+              <Card>
+                <CardContent className="p-4">
+                  <h4 className="font-medium mb-3">Thông tin chuyển khoản</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Ngân hàng:</span>
+                      <span className="font-medium">Vietcombank</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Số tài khoản:</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium">0123456789</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard('0123456789')}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Chủ tài khoản:</span>
+                      <span className="font-medium">Spa Relaxation</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Số tiền:</span>
+                      <span className="font-medium text-amber-600">
+                        {formatCurrency(booking.depositAmount)}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="text-center">
+                <div className="w-48 h-48 bg-gray-100 rounded-xl mx-auto flex items-center justify-center mb-4">
+                  <div className="text-center">
+                    <QrCode className="h-16 w-16 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Mã QR thanh toán</p>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-center text-gray-600">Lịch hẹn sẽ tự động hủy sau 10 phút nếu khách hàng không chuyển khoản cọc!
+              Vui lòng chuyển khoản theo thông tin trên và bấm "Đã cọc" để hoàn tất đặt lịch hẹn.</p>
 
               <div className="flex space-x-3">
                 <Button
@@ -229,9 +299,9 @@ export default function PaymentModal({ isOpen, onClose, bookingData }: PaymentMo
                   onClick={() => verifyPaymentMutation.mutate(booking.id)}
                   disabled={verifyPaymentMutation.isPending}
                 >
-                  {verifyPaymentMutation.isPending ? "Đang xác thực..." : "Đã chuyển khoản"}
+                  {verifyPaymentMutation.isPending ? "Đang xác thực..." : "Đã cọc"}
                 </Button>
-                <Button variant="outline" className="flex-1" onClick={handleClose}>
+                <Button variant="outline" className="flex-1" onClick={handleCloseWithRefresh}>
                   Hủy
                 </Button>
               </div>
@@ -267,12 +337,36 @@ export default function PaymentModal({ isOpen, onClose, bookingData }: PaymentMo
                       </span>
                     </div>
                     <div className="flex justify-between">
+                      <span>Thời gian massage:</span>
+                      <span className="font-medium">{booking.startTime} - {booking.endTime} ({booking.duration} phút)</span>
+                    </div>
+                    <div className="flex justify-between">
                       <span>Kỹ thuật viên:</span>
                       <span className="font-medium">{bookingData.selectedTechnician.name}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Dịch vụ:</span>
                       <span className="font-medium">{bookingData.selectedService.name}</span>
+                    </div>
+                    {bookingData.additionalServices && bookingData.additionalServices.length > 0 && (
+                      <div className="flex justify-between">
+                        <span>Dịch vụ thêm:</span>
+                        <span className="font-medium">{bookingData.additionalServices.map((s: any) => s.name).join(', ')}</span>
+                      </div>
+                    )}
+                    <div className="border-t pt-2 mt-2">
+                      <div className="flex justify-between">
+                        <span>Tổng tiền:</span>
+                        <span className="font-medium">{formatCurrency(booking.totalAmount)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Đã cọc:</span>
+                        <span className="font-medium text-green-600">{formatCurrency(booking.depositAmount)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Còn lại:</span>
+                        <span className="font-medium text-amber-600">{formatCurrency(booking.totalAmount - booking.depositAmount)}</span>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -287,8 +381,8 @@ export default function PaymentModal({ isOpen, onClose, bookingData }: PaymentMo
                 </div>
               </div>
 
-              <Button className="w-full" onClick={handleClose}>
-                Xong
+              <Button className="w-full" onClick={handleCloseWithRefresh}>
+                Hoàn tất
               </Button>
             </div>
           </>

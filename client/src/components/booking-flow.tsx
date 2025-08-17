@@ -219,15 +219,9 @@ export default function BookingFlow({ bookingData, onBookingDataChange }: Bookin
               </div>
             </div>
 
-            <div className="mt-6 flex justify-between">
+            <div className="mt-6 flex justify-start">
               <Button variant="outline" onClick={() => setCurrentStep(2)}>
                 Quay lại
-              </Button>
-              <Button
-                disabled={!bookingData.customerInfo.name || !bookingData.customerInfo.phone}
-                onClick={() => setCurrentStep(4)}
-              >
-                Hoàn tất
               </Button>
             </div>
           </CardContent>

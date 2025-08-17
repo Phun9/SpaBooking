@@ -11,6 +11,13 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes (August 17, 2025)
 
 - **Migration Completed**: Successfully migrated from Replit Agent to Replit environment
+- **Blocked Time Slot Bug Fix**: Fixed critical logic error where blocked time slots only blocked exact start times
+  - Changed logic to properly block ALL time slots within blocked time ranges
+  - Example: If technician blocked 13:00-17:30, now correctly blocks 13:00, 14:00, 15:00, 16:00, 17:00
+  - Updated both `getAvailableTimeSlots` and `getTechnicianAvailability` functions
+- **UI Bug Fix**: Removed non-functional "Hoàn tất" button from step 3 "Thông tin khách hàng"
+  - Button was trying to navigate to non-existent step 4
+  - Booking completion is properly handled through BookingSummary component
 - **Duration Update**: Changed service duration from 60 minutes to 45 minutes throughout the system:
   - Updated frontend display text from "60 phút" to "45 phút"
   - Modified all duration logic in components (service selection, booking summary, booking lookup)
@@ -20,6 +27,11 @@ Preferred communication style: Simple, everyday language.
   - **Code Update**: Changed all references from `price60` to `price45` throughout the application
   - Fixed total calculation logic in booking summary
   - **Time Slot Bug Fix**: Fixed multi-slot booking availability logic - 90-minute bookings now correctly block all overlapping time slots
+- **Enhanced Payment Modals**: Improved payment flow user experience
+  - **Success Modal Enhancement**: Added complete booking information including massage time, additional services, total/deposit/remaining amounts
+  - **Button Update**: Changed "Xong" to "Hoàn tất" with page refresh functionality
+  - **Payment Verification Improvement**: Added complete bank transfer information in verification modal for users who missed previous step
+  - **Page Refresh**: Added page refresh functionality when clicking "Hủy" in payment verification modal
 - **Database Setup**: Created PostgreSQL database and pushed schema successfully
 - **Dependencies**: Installed missing tsx package and resolved build issues
 
